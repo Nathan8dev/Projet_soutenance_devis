@@ -1,0 +1,102 @@
+{% extends 'gestion/index.html' %}
+{% block css %}
+<style>
+
+    #nom{
+    color: black;
+    }
+    #nom:hover{
+    color: blue;
+    }
+
+</style>
+
+{% endblock %}
+{% block main %}
+    <div class="col-lg-12" style="display: flex; flex-wrap: wrap; justify-content: space-between; ">
+        {% for particulier in particuliers %}
+
+                <div style="
+                    border: 1px solid rgb(189, 185, 185);
+                    border-radius: 10px;
+                    width: 360px;
+                    padding: 1em;
+                    margin-top: 1em;
+                    ">
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        ">
+                        <div>
+                                <b><a href="{% url 'detail_client' particulier.id %}" id="nom">{{ particulier.nom }}</a></b><br>
+                            <i>{{ particulier.type }}</i>
+                        </div>
+
+                    </div>
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        padding-top: 1em;
+                        ">
+                        <div>
+                            <i class="fa-regular fa-envelope"></i>
+                            <i>{{ particulier.email }}</i>
+                        </div>
+                        <div>
+                            {{ particulier.contact1 }}
+                        </div>
+                    </div>
+                </div>
+
+        {% endfor %}
+
+        {% for entreprise in entreprises %}
+
+                <div style="
+                    border: 1px solid rgb(189, 185, 185);
+                    border-radius: 10px;
+                    width: 360px;
+                    padding: 1em;
+                    margin-top: 1em;
+                    ">
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        ">
+                        <div>
+                                <b><a href="{% url 'detail_client' entreprise.id %}" id="nom_entreprise">{{ entreprise.nom }}</a></b><br>
+                            <i>{{ entreprise.type }}</i>
+                        </div>
+
+                    </div>
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        padding-top: 1em;
+                        ">
+                        <div>
+                            <i class="fa-regular fa-envelope"></i>
+                            <i>{{ entreprise.email }}</i>
+                        </div>
+                        <div>
+                            {{ entreprise.contact1 }}
+                        </div>
+                    </div>
+                </div>
+
+        {% endfor %}
+
+    </div>
+
+
+
+{% endblock %}
+
+<!--<script>
+const div = document.querySelector('#div');
+const menu = document.querySelector('#menu');
+
+div.addEventListener('click', () => {
+  menu.classList.toggle('show');
+});
+</script>-->

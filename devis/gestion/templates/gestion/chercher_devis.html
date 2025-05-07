@@ -1,0 +1,13 @@
+{% extends 'gestion/index.html' %}
+
+{% block main %}
+
+
+    <h1>Resultat</h1>
+    {% for client in clients %}
+        <div>{{ client.nom }}</div>
+    {% empty %}
+        <div>aucun devis avec un client de ce nom</div>
+    {% endfor %}
+
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends 'detail-page.html' %}
+{% load static %}
+{% block css %}
+<style>
+    #choix{
+    display: none;
+    }
+    a{
+    color: black;
+    }
+</style>
+{% endblock %}
+{% block deconnexion %}
+    <a href="{% url 'logout' %}"><button class="btn btn-primary" >Deconnexion</button></a>
+{% endblock %}
+
+{% block content %}
+
+
+
+
+                <div class="row g-4">
+
+
+                    <div class="col-lg-8">
+                        <div class="bg-light rounded p-4 my-4">
+                            <h4 class="mb-4">Vos Actions</h4>
+                            <hr>
+                            {% block main %}
+
+                            {% endblock %}
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <div class="p-3 rounded border">
+                                    <form action="{% url 'rechercher_client' %}" method="GET" >
+                                       <div style="display: flex;">
+                                            <input class="form-control py-3" type="search"  name="recherche" placeholder="chercher un client par son nom" value="{{ request.GET.recherche }}">
+                                            <button type="submit" class="btn-search btn border border-primary btn-md-square rounded-circle bg-white my-auto" data-bs-toggle="modal" data-bs-target="#searchModal"><i class="fas fa-search text-primary"></i></button>
+
+                                       </div>
+                                    </form>
+                                    <h4 class="mb-4">votre Gestion</h4>
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <div id="insert" class="link-hover btn btn-light w-100 rounded text-uppercase text-dark py-3">
+                                                Enregistrer un client
+                                            </div>
+                                        </div>
+                                        <div id="choix" class="col-12" style="
+                                        display: flex; justify-content: space-between;">
+                                            <a href="{% url 'Add_client' %}">
+                                                <div class="btn btn-primary">
+                                                    Particulier
+                                                </div>
+                                            </a>
+
+
+                                            <a href="{% url 'Add_entreprise' %}">
+                                                <div class="btn btn-primary">
+                                                    Entreprise
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="col-12">
+                                            <a href="{% url 'liste_client' %}">
+                                                <div class="link-hover btn btn-light w-100 rounded text-uppercase text-dark py-3">
+                                                    liste de clients
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="col-12">
+                                            <a href="{% url 'afficher_devis' %}">
+                                                <div class="link-hover btn btn-light w-100 rounded text-uppercase text-dark py-3">
+                                                    Faire un Dévis
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="col-12">
+                                            <a href="{% url 'liste_devis' %}">
+                                                <div class="link-hover btn btn-light w-100 rounded text-uppercase text-dark py-3">
+                                                    Voir tout les devis
+                                                </div>
+                                            </a>
+                                        </div>
+
+
+<!--
+
+                                        <div class="col-12">
+                                            <div class="link-hover btn btn-light w-100 rounded text-uppercase text-dark py-3">
+                                                Relationship
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="link-hover btn btn-light w-100 rounded text-uppercase text-dark py-3">
+                                                Art & Culture
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="link-hover btn btn-light w-100 rounded text-uppercase text-dark py-3">
+                                                Self Development
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="link-hover btn btn-light w-100 rounded text-uppercase text-dark py-3 mb-4">
+                                                travel & tourism
+                                            </div>
+                                        </div>-->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+        <!-- Single Product End-->
+
+
+<script>
+    $(document).ready(function(){
+        $('#insert').click(function(){
+            $('#choix').toggle();
+        });
+    });
+</script>
+
+{% endblock %}

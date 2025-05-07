@@ -1,0 +1,96 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pdf</title>
+
+<style>
+*{
+font-size: 15px;
+}
+
+
+</style>
+    
+</head>
+
+<body>
+
+<div id="conteneur" class="container" style="background: white; width: 100%; border: 1px solid gray; border-radius: 12px; color: black;">
+
+    <div style="display: flex; justify-content: space-between;">
+
+        <div>
+            <b style="font-size: 32px; color: #1b7dff;  ">Nathan Devis</b>
+            <div style="margin: 23px 0px 23px 0px;">
+                <b> À L'ATTENTION DE: <b style="color: gray">{{ client }}</b></b><br>
+                <b>Date du Devis: <b style="color: gray">{{ date_devis }}</b></b> <br>
+                <b>Objet du Devis: <b style="color: gray">{{ objet }}</b></b>
+            </div>
+
+
+
+
+        </div>
+
+
+        <div>
+                <h1 style="font-size: 21px">Devis numero: <b style="color: gray; font-size: 21px">{{ numero }}</b></h1>
+
+        </div>
+
+    </div>
+    
+
+    <section style="margin-bottom: 25px;">
+        <table style="border: 2px solid gray; width: 100%;">
+
+            <thead style="background-color: black; color: white;">
+                <th>Designations</th>
+                <th>quantités</th>
+                <th>Prix unitaire</th>
+                <th>Prix Total</th>
+            </thead>
+
+            <tbody>
+            {% for ligne in lignes_devis %}
+            <tr>
+                <td>{{ ligne.designation }}</td>
+                <td>{{ ligne.quantite }}</td>
+                <td>{{ ligne.prix_unitaire }} fcfa</td>
+                <td>{{ ligne.prix_ht }} fcfa</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+
+            <tfoot>
+                <tr style="background-color: gray;">
+                    <td colspan="3">TOTAL Prix HT</td>
+                    <td>{{ total_ht }} fcfa</td>
+                </tr>
+                <tr style="background-color: blue;">
+                    <td colspan="3">TOTAL TVA(%)</td>
+                    <td>{{ total_TVA }} %</td>
+                </tr>
+                <tr style="background-color: blueviolet;">
+                    <td colspan="3">TOTAL TTC</td>
+                    <td>{{ total_ttc }} fcfa</td>
+                </tr>
+            </tfoot>
+
+        </table>
+    </section>
+
+    
+
+    <hr>
+    <h4 style="text-align: center">Merci pour votre confiance.</h4>
+
+</div>
+
+
+</body>
+</html>

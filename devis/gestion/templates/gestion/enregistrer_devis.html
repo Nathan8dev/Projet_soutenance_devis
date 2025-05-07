@@ -1,0 +1,183 @@
+{% extends 'gestion/index.html' %}
+
+
+
+{% block content %}
+
+
+             <form action="{% url 'creer_devis' %}" method="POST" id="formulaire">
+
+                <div class="row g-4">
+
+
+                    <div class="col-lg-8">
+                        <div class="bg-light rounded p-4 my-4">
+                            <h4 class="mb-4">Vos Actions</h4>
+                            <hr>
+                            {% block main %}
+
+                                {% csrf_token %}
+                                <h3>Enregistrer un devis</h3>
+                                <div class="row g-4">
+                                    <div class="col-12">
+
+                                        <textarea class="form-control"  cols="30" rows="7" placeholder="Objet Du Devis " name="objet_devis" required></textarea>
+                                    </div>
+                                        <div class="col-lg-12">
+                                            <label><b>Selectionnez un Client</b></label>
+                                            <select class="form-control py-3" name="client" id="client">
+
+                                                {% for client in clients %}
+                                                    <option style="font-size: 20px;" value="{{ client.id }}" name="client">{{ client.nom }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+
+                                    <table id="tableau_produits" style="border: 1px solid;">
+                                        <thead>
+                                            <tr>
+                                                <th>Désignation</th>
+                                                <th>quantité</th>
+                                                <th>Prix HT</th>
+                                                <th>TVA</th>
+                                                <th>Prix TTC</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                        </tbody>
+                                       <tfoot>
+                                            <tr>
+
+                                                <th >Total</th>
+                                                <td ></td>
+                                                <td ></td>
+                                                <td></td>
+                                                <td colspan="4" id="prixTotal"></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+
+                                        <button class="form-control btn btn-primary py-3" type="submit">creer Devis</button>
+                                </div>
+
+                            {% endblock %}
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <div class="p-3 rounded border">
+                                    <div id="formulaire_produit">
+                                        <h2>Ajouter les produits ici</h2>
+                                        <label>Désignation:</label>
+                                        <input class="form-control py-3" type="text" id="designation" > <br>
+
+                                        <label>quantité:</label>
+                                        <input class="form-control py-3" type="text" id="quantite" > <br>
+                                        <label>Prix unitaire:</label>
+                                        <input class="form-control py-3" type="number" step="0.01" max="99,99"  id="prix" name="prix_unitaire"> <br>
+
+                                        <label>TVA(%)</label>
+                                        <input class="form-control py-3" type="number" step="0.01" max="99,99"  id="tva"> <br>
+
+                                        <div class="btn btn-primary" id="valider">Valider</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+
+
+
+<!-------------js-------------------->
+
+    <script>
+        function getCookie(name) {
+            const value = document.cookie.match('(^|;)\\s*' + name + '=([^;]*)');
+            return value ? value[2] : null;
+        }
+
+
+
+
+
+
+
+
+
+        function ajouterproduit() {
+
+            produit = getCookie("produit")
+
+            const tableau = document.getElementById('tableau_produits').getElementsByTagName('tbody')[0];
+            const designation = document.getElementById('designation').value;
+            const quantite = document.getElementById('quantite').value;
+            const prix = document.getElementById('prix').value;
+            const tva = document.getElementById('tva').value ;
+
+            const prixHT = quantite * prix;
+            const prixTTC = prixHT * (1 + tva / 100);
+
+
+            const nouvelleLigne = document.createElement('tr');
+            nouvelleLigne.innerHTML = `
+                <td>${designation}</td>
+                <td>${quantite}</td>
+                <td>${prixHT} fcfa</td>
+                <td>${tva}%</td>
+                <td>${prixTTC.toFixed(2)} fcfa</td>
+            `;
+            tableau.appendChild(nouvelleLigne);
+
+            document.getElementById('designation').value = '';
+            document.getElementById('quantite').value = '';
+            document.getElementById('prix').value = '';
+            document.getElementById('tva').value = '';
+
+            const piedTableau = document.getElementById('tableau_produits').tFoot;
+              const totalTTCCell = document.getElementById('prixTotal');
+
+              let totalTTC = 0;
+              const lignes = tableau.querySelectorAll('tr');
+              lignes.forEach(ligne => {
+                const prixTTC = ligne.querySelector('td:last-child').textContent.replace(' fcfa', '');
+                totalTTC += parseFloat(prixTTC);
+              });
+
+              totalTTCCell.textContent = totalTTC.toFixed(2) + ' fcfa';
+
+
+
+            if(produit){
+                produit = JSON.parse(produit);
+                console.log(produit.length,produit);
+                productObject = {designation,quantite,prix,prixHT,tva,prixTTC : prixTTC.toFixed(2)};
+                produit[produit.length] = productObject;
+                produit = JSON.stringify(produit);
+                document.cookie = `produit=${produit}; path=/`
+
+
+            }
+            else {
+                produit = [];
+                productObject = {designation,quantite,prix,prixHT,tva,prixTTC : prixTTC.toFixed(2)};
+                produit[0] = productObject;
+                produit = JSON.stringify(produit);
+                document.cookie = `produit=${produit}; path=/`
+            }
+        }
+
+        document.getElementById('valider').addEventListener('click', () => {
+            ajouterproduit();
+        });
+
+    </script>
+
+{% endblock %}

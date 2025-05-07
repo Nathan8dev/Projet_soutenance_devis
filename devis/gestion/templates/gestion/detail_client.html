@@ -1,0 +1,119 @@
+{% extends 'gestion/index.html' %}
+{% block css %}
+<style>
+    tr{
+    border-bottom: 1px Solid rgb(245, 236, 236);
+    }
+    td{
+    color: black;
+    font-size: 20px;
+    }
+    .flex{
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    }
+    a{
+    margin-right: 2em;
+    }
+</style>
+
+{% endblock %}
+{% block main %}
+<div>
+    <div class="flex">
+        <a href="{% url 'modifier' client.id %}"><button class="btn btn-primary" >modifier ce client</button></a>
+        <a href="{% url 'delete' client.id %}"><button class="btn btn-primary" >Supprimer</button></a>
+    </div>
+    {% if client.type == 'particulier' %}
+        <table style="margin-top: 3em;">
+            <tbody>
+                <tr>
+                    <td>nom :</td>
+                    <td>{{ particulier.nom }}</td>
+                </tr>
+                <tr>
+                    <td>prenom :</td>
+                    <td>{{ particulier.prenom }}</td>
+                </tr>
+                <tr>
+                    <td>adresse :</td>
+                    <td>{{ particulier.lieu }}</td>
+                </tr>
+                <tr>
+                    <td>adresse email :</td>
+                    <td>{{ particulier.email }}</td>
+                </tr>
+                <tr>
+                    <td>numéro de telephone :</td>
+                    <td>{{ particulier.contact1 }}</td>
+                </tr>
+                <tr>
+                    <td>numéro de telephone :</td>
+                    <td>{{ particulier.contact2 }}</td>
+                </tr>
+
+                <tr>
+                    <td>statut :</td>
+                    <td>{{ particulier.type }}</td>
+                </tr>
+                <tr>
+                    <td>notes :</td>
+                    <td>{{ particulier.infos_supp }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
+
+
+    {% if client.type == 'entreprise' %}
+
+        <table style="margin-top: 3em;">
+            <tbody>
+                <tr>
+                    <td>nom :</td>
+                    <td>{{ entreprise.nom }}</td>
+                </tr>
+
+                <tr>
+                    <td>adresse :</td>
+                    <td>{{ entreprise.lieu }}</td>
+                </tr>
+                <tr>
+                    <td>adresse email :</td>
+                    <td>{{ entreprise.email }}</td>
+                </tr>
+                <tr>
+                    <td>numéro de telephone :</td>
+                    <td>{{ entreprise.contact1 }}</td>
+                </tr>
+                <tr>
+                    <td>numéro de telephone :</td>
+                    <td>{{ entreprise.contact2 }}</td>
+                </tr>
+
+                <tr>
+                    <td>statut :</td>
+                    <td>{{ entreprise.type }}</td>
+                </tr>
+                <tr>
+                    <td>immatriculation :</td>
+                    <td>{{ entreprise.immatriculation }}</td>
+                </tr>
+                <tr>
+                    <td>date de creation :</td>
+                    <td>{{ entreprise.date_creation|date:"d-m-Y" }}</td>
+                </tr>
+                <tr>
+                    <td>notes :</td>
+                    <td>{{ entreprise.infos_supp }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
+
+
+</div>
+
+
+{% endblock %}
