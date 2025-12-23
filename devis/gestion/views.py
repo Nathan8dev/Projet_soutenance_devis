@@ -1,3 +1,4 @@
+#importation de tout les paquets dont on a besoin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.validators import validate_email
 from django.contrib.auth.models import User
@@ -7,10 +8,6 @@ from django.contrib.auth import authenticate, login, logout
 from .models import Client, Devis, Particulier,Entreprise,LigneDevis
 import json
 from django.http import HttpResponseRedirect
-
-
-
-
 
 import io
 import os
@@ -202,7 +199,7 @@ def Modifier_client(request, id):
         if client.type == 'particulier':
             client.nom = request.POST.get('nom')
             client.prenom = request.POST.get('prenom')
-            client.lieu = request.POST.get('adresse')
+            client.lieu = request.POST.get('lieu')
             client.email = request.POST.get('email')
             client.contact1 = request.POST.get('contact1')
             client.contact2 = request.POST.get('contact2')
@@ -408,8 +405,9 @@ def Generer_word(request):
         docx.writ(document)
     return response
 
+@login_required
 def Liste_devis(request):
-    deviss = Devis.objects.filter()
+    deviss = Devis.objects.filter(id_user=request.user)
     return render(request, 'gestion/liste_devis.html', {'deviss': deviss})
 
 def Detail_devis(request,numero):

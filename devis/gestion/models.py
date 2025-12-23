@@ -35,7 +35,7 @@ class Devis(models.Model):
         ('refuse', 'Devis refusé'),
         ('en_cours', 'Devis en cours'),
     ]
-
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE)
     id_client = models.ForeignKey(Client, on_delete=models.CASCADE)
     numero = models.IntegerField(primary_key=True, unique=True)
     date_creation = models.DateField(auto_now_add=True)

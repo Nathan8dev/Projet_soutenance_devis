@@ -1,14 +1,7 @@
 {% extends 'detail-page.html' %}
 {% load static %}
 {% block css %}
-<style>
-    #choix{
-    display: none;
-    }
-    a{
-    color: black;
-    }
-</style>
+
 {% endblock %}
 {% block deconnexion %}
     <a href="{% url 'logout' %}"><button class="btn btn-primary" >Deconnexion</button></a>
@@ -51,8 +44,7 @@
                                                 Enregistrer un client
                                             </div>
                                         </div>
-                                        <div id="choix" class="col-12" style="
-                                        display: flex; justify-content: space-between;">
+                                        <div id="choix" class="col-12" style="display: none;">
                                             <a href="{% url 'Add_client' %}">
                                                 <div class="btn btn-primary">
                                                     Particulier
