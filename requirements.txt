@@ -76,3 +76,6 @@ wheel==0.42.0
 xdg==5
 xkit==0.0.0
 zipp==1.0.0
+Django==5.1
+weasyprint==65.1
+html2docx==1.6.0

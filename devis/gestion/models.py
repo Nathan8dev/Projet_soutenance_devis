@@ -8,7 +8,6 @@ class Client(models.Model):
     lieu = models.CharField(max_length=250)
     email = models.CharField(max_length=250)
     contact1 = models.IntegerField()
-    contact2 = models.IntegerField()
     infos_supp = models.CharField(max_length=250)
     TYPE_CLIENT=[
         ('particulier', 'Particulier'),
@@ -29,7 +28,7 @@ class Particulier(Client):
 
 
 class Devis(models.Model):
-
+        
     STATUTS_CHOICES = [
         ('valide', 'Devis validé'),
         ('refuse', 'Devis refusé'),
@@ -37,12 +36,23 @@ class Devis(models.Model):
     ]
     id_user = models.ForeignKey(User, on_delete=models.CASCADE)
     id_client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    numero = models.IntegerField(primary_key=True, unique=True)
+    numero = models.AutoField(primary_key=True, unique=True)
     date_creation = models.DateField(auto_now_add=True)
     objet_devis = models.CharField(max_length=255)
     statut = models.CharField(max_length=20, choices=STATUTS_CHOICES, default='en_cours')
     total_ht = models.DecimalField(max_digits=10, decimal_places=2)
     total_ttc = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    class Meta:
+        ordering = ['numero']
+        
+    def get_numero_sequentiel(self):
+        count = Devis.objects.filter(
+            id_user=self.id_user, 
+            numero__lte=self.numero
+        ).count()
+        
+        return f"{count:03d}"
     def __str__(self):
         return self.objet_devis
 

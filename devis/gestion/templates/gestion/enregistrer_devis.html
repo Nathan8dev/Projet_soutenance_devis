@@ -81,8 +81,9 @@
                                         <label>Prix unitaire:</label>
                                         <input class="form-control py-3" type="number" step="0.01" max="99,99"  id="prix" name="prix_unitaire"> <br>
 
+
                                         <label>TVA(%)</label>
-                                        <input class="form-control py-3" type="number" step="0.01" max="99,99"  id="tva"> <br>
+                                        <input class="form-control py-3" type="number" step="0.01" max="99.99" value="19.25" id="tva"> <br>
 
                                         <div class="btn btn-primary" id="valider">Valider</div>
                                     </div>
@@ -104,14 +105,6 @@
             return value ? value[2] : null;
         }
 
-
-
-
-
-
-
-
-
         function ajouterproduit() {
 
             produit = getCookie("produit")
@@ -120,7 +113,8 @@
             const designation = document.getElementById('designation').value;
             const quantite = document.getElementById('quantite').value;
             const prix = document.getElementById('prix').value;
-            const tva = document.getElementById('tva').value ;
+            // Utiliser la valeur du champ TVA, par défaut 19.25 si vide
+            const tva = parseFloat(document.getElementById('tva').value) || 19.25;
 
             const prixHT = quantite * prix;
             const prixTTC = prixHT * (1 + tva / 100);
@@ -139,7 +133,7 @@
             document.getElementById('designation').value = '';
             document.getElementById('quantite').value = '';
             document.getElementById('prix').value = '';
-            document.getElementById('tva').value = '';
+            document.getElementById('tva').value = '19.25';
 
             const piedTableau = document.getElementById('tableau_produits').tFoot;
               const totalTTCCell = document.getElementById('prixTotal');

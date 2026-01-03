@@ -1,46 +1,105 @@
 {% extends 'gestion/index.html' %}
 {% block css %}
 <style>
-
-    #nom{
-    color: black;
+    #nom {
+        color: black;
+        text-decoration: none;
+        font-weight: bold;
     }
-    #nom:hover{
-    color: blue;
+    #nom:hover {
+        color: blue;
     }
-
+    .devis-card {
+        border: 1px solid rgb(189, 185, 185);
+        border-radius: 10px;
+        width: 360px;
+        padding: 1em;
+        margin-top: 1em;
+        transition: box-shadow 0.3s;
+    }
+    .devis-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .devis-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+    }
+    .devis-info {
+        font-size: 14px;
+        color: #666;
+    }
+    .statut {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    .statut-en_cours {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    .statut-valide {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .statut-refuse {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    .total {
+        font-size: 18px;
+        font-weight: bold;
+        color: #28a745;
+        margin-top: 10px;
+    }
+    .no-devis {
+        text-align: center;
+        padding: 50px;
+        color: #666;
+    }
 </style>
-
 {% endblock %}
+
 {% block main %}
-    <div class="col-lg-12" style="display: flex; flex-wrap: wrap; justify-content: space-between; ">
-        {% for devis in deviss %}
-
-                <div style="
-                    border: 1px solid rgb(189, 185, 185);
-                    border-radius: 10px;
-                    width: 360px;
-                    padding: 1em;
-                    margin-top: 1em;
-                    ">
-                    <div style="
-                        display: flex;
-                        justify-content: space-between;
-                        ">
+    <div class="col-lg-12" style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+        {% if deviss %}
+            {% for devis in deviss %}
+                <div class="devis-card">
+                    <div class="devis-header">
                         <div>
-                                <b><a href="{% url 'detail' devis.numero %}" id="nom">{{ devis.objet_devis }}</a></b><br>
+                            <b><a href="{% url 'detail' devis.numero %}" id="nom">{{ devis.objet_devis }}</a></b>
                         </div>
-
+                        <div>
+                            {% if devis.statut == 'en_cours' %}
+                                <span class="statut statut-en_cours">En cours</span>
+                            {% elif devis.statut == 'valide' %}
+                                <span class="statut statut-valide">Validé</span>
+                            {% elif devis.statut == 'refuse' %}
+                                <span class="statut statut-refuse">Refusé</span>
+                            {% else %}
+                                <span class="statut">{{ devis.statut }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="devis-info">
+                        <p><strong>Client:</strong> {{ devis.id_client.nom }}</p>
+                        <p><strong>Date:</strong> {{ devis.date_creation|date:"d/m/Y" }}</p>
+                        <p><strong>Numéro:</strong> {{ devis.get_numero_sequentiel  }}</p>
+                    </div>
+                    <div class="total">
+                        {{ devis.total_ttc|floatformat:2 }} fcfa
                     </div>
                 </div>
-
-        {% endfor %}
-
-
-
+            {% endfor %}
+        {% else %}
+            <div class="no-devis">
+                <h3>Aucun devis trouvé</h3>
+                <p>Vous n'avez pas encore créé de devis.</p>
+                <a href="{% url 'afficher_devis' %}" class="btn btn-primary">Créer un devis</a>
+            </div>
+        {% endif %}
     </div>
-
-
-
 {% endblock %}
 

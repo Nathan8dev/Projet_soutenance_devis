@@ -1,107 +1,81 @@
 {% extends 'gestion/index.html' %}
+
 {% block css %}
 <style>
-
-    #nom{
-    color: black;
+    .client-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+        width: 100%;
     }
-    #nom:hover{
-    color: blue;
+    .client-card {
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 1.2em;
+        background: #fff;
+        transition: 0.3s;
     }
-
+    .client-card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-color: #007bff;
+    }
+    .client-link {
+        color: black;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    .client-link:hover {
+        color: blue;
+    }
+    .badge-type {
+        font-size: 0.8em;
+        color: #666;
+        font-style: italic;
+    }
 </style>
-
 {% endblock %}
+
 {% block main %}
-    <div class="col-lg-12" style="display: flex; flex-wrap: wrap; justify-content: space-between; ">
-        {% if not particuliers or entreprises %}
-            <p>Aucun Client Enregistré</p>
+<div class="container mt-4">
+    <div class="client-grid">
+        {% if not particuliers and not entreprises %}
+            <div class="col-12 text-center">
+                <p>Aucun Client Enregistré</p>
+                <a href="#" class="btn btn-primary btn-sm">Ajouter un client</a>
+            </div>
         {% else %}
 
             {% for particulier in particuliers %}
-
-                    <div style="
-                        border: 1px solid rgb(189, 185, 185);
-                        border-radius: 10px;
-                        width: 360px;
-                        padding: 1em;
-                        margin-top: 1em;
-                        ">
-                        <div style="
-                            display: flex;
-                            justify-content: space-between;
-                            ">
-                            <div>
-                                    <b><a href="{% url 'detail_client' particulier.id %}" id="nom">{{ particulier.nom }}</a></b><br>
-                                <i>{{ particulier.type }}</i>
-                            </div>
-
-                        </div>
-                        <div style="
-                            display: flex;
-                            justify-content: space-between;
-                            padding-top: 1em;
-                            ">
-                            <div>
-                                <i class="fa-regular fa-envelope"></i>
-                                <i>{{ particulier.email }}</i>
-                            </div>
-                            <div>
-                                {{ particulier.contact1 }}
-                            </div>
+                <div class="client-card">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <a href="{% url 'detail_client' particulier.id %}" class="client-link">{{ particulier.nom }}</a><br>
+                            <span class="badge-type">{{ particulier.type }}</span>
                         </div>
                     </div>
-
+                    <div class="d-flex justify-content-between mt-3">
+                        <small><i class="fa-regular fa-envelope"></i> {{ particulier.email }}</small>
+                        <small>{{ particulier.contact1 }}</small>
+                    </div>
+                </div>
             {% endfor %}
 
             {% for entreprise in entreprises %}
-
-                    <div style="
-                        border: 1px solid rgb(189, 185, 185);
-                        border-radius: 10px;
-                        width: 360px;
-                        padding: 1em;
-                        margin-top: 1em;
-                        ">
-                        <div style="
-                            display: flex;
-                            justify-content: space-between;
-                            ">
-                            <div>
-                                    <b><a href="{% url 'detail_client' entreprise.id %}" id="nom_entreprise">{{ entreprise.nom }}</a></b><br>
-                                <i>{{ entreprise.type }}</i>
-                            </div>
-
-                        </div>
-                        <div style="
-                            display: flex;
-                            justify-content: space-between;
-                            padding-top: 1em;
-                            ">
-                            <div>
-                                <i class="fa-regular fa-envelope"></i>
-                                <i>{{ entreprise.email }}</i>
-                            </div>
-                            <div>
-                                {{ entreprise.contact1 }}
-                            </div>
+                <div class="client-card">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <a href="{% url 'detail_client' entreprise.id %}" class="client-link">{{ entreprise.nom }}</a><br>
+                            <span class="badge-type">{{ entreprise.type }}</span>
                         </div>
                     </div>
-
+                    <div class="d-flex justify-content-between mt-3">
+                        <small><i class="fa-regular fa-envelope"></i> {{ entreprise.email }}</small>
+                        <small>{{ entreprise.contact1 }}</small>
+                    </div>
+                </div>
             {% endfor %}
+
         {% endif %}
-
     </div>
-
-
-
+</div>
 {% endblock %}
-
-<!--<script>
-const div = document.querySelector('#div');
-const menu = document.querySelector('#menu');
-
-div.addEventListener('click', () => {
-  menu.classList.toggle('show');
-});
-</script>-->

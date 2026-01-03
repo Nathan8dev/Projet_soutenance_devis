@@ -20,7 +20,8 @@ from gestion import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.Inscription, name='inscription'),
+    path('', views.accueil_site, name='accueil_site'),
+    path('Inscription/', views.Inscription, name='inscription'),
     path('connexion/', views.Connexion, name='connexion'),
     path('accueil/',views.Accueil, name='accueil'),
     path('logout/', views.log_out, name='logout'),
@@ -36,7 +37,7 @@ urlpatterns = [
 
 
     path('creer_devis/', views.Creer_devis, name="creer_devis"),
-    path('creerdevis/', views.DevisFinal, name="creerdevis"),
+    path('Devis_final/', views.DevisFinal, name="Devis_final"),
 
 
 

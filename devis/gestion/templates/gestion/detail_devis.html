@@ -1,67 +1,194 @@
 {% extends 'gestion/index.html' %}
 {% block css %}
 <style>
-    tr{
-    border-bottom: 1px Solid rgb(245, 236, 236);
+    .btn-action {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
     }
-    td{
-    color: black;
-    font-size: 20px;
+    
+    .devis-info {
+        margin-bottom: 25px;
+        padding: 20px;
+        background-color: #ffffff;
+        border: 1px solid #e3e6f0;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
-    .flex{
-    display: flex;
-    justify-content: flex-end;
-    flex-wrap: wrap;
+    
+    .devis-info h2 {
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
     }
-    a{
-    margin-right: 2em;
+
+    .lignes-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: white;
     }
+    
+    .lignes-table th {
+        background-color: #007bff; /* Bleu comme ton header */
+        color: white;
+        padding: 15px;
+        text-align: left;
+    }
+
+    .lignes-table td {
+        border: 1px solid #eee;
+        padding: 12px;
+        font-size: 16px;
+        color: #333;
+    }
+
+    .totals-container {
+        margin-top: 30px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .totals-table {
+        width: 350px;
+        border: 1px solid #ddd;
+    }
+
+    .totals-table td {
+        padding: 10px 15px;
+        font-size: 18px;
+    }
+
+    .bg-light-gray {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+
+    .text-success {
+        color: #28a745 !important;
+        font-size: 22px !important;
+    }
+
+    .badge {
+        padding: 8px 12px;
+        border-radius: 50px;
+        font-size: 14px;
+    }
+    .badge-warning { background-color: #fff3cd; color: #856404; }
+    .badge-success { background-color: #d4edda; color: #155724; }
+    .badge-danger { background-color: #f8d7da; color: #721c24; }
 </style>
-
 {% endblock %}
+
 {% block main %}
-<div>
-    <div class="flex">
-        <a href="{% url 'supprimer' deviss.numero  %}"><button class="btn btn-primary" >Supprimer</button></a>
+<div class="container-fluid">
+    <div class="btn-action">
+        <a href="{% url 'supprimer' deviss.numero %}" class="btn btn-outline-danger" onclick="return confirm('Voulez-vous vraiment supprimer ce devis ?')">
+            <i class="fa fa-trash"></i> Supprimer
+        </a>
+        <a href="{% url 'pdf' %}" class="btn btn-primary">
+            <i class="fa fa-file-pdf"></i> Générer PDF
+        </a>
+        <a href="{% url 'word' %}" class="btn btn-success">
+            <i class="fa fa-file-word"></i> Générer Word
+        </a>
     </div>
-        <table style="margin-top: 3em;">
+    
+    <div class="devis-info">
+        <h2>Détails du Devis #{{ deviss.get_user_devis_number }}</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-borderless">
+                    <tr>
+                        <td width="180"><strong>Client :</strong></td>
+                        <td>{{ deviss.id_client.nom }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Numéro Interne :</strong></td>
+                        <td>{{ numero }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Objet du devis :</strong></td>
+                        <td>{{ deviss.objet_devis }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-borderless">
+                    <tr>
+                        <td width="180"><strong>Date de création :</strong></td>
+                        <td>{{ deviss.date_creation|date:"d/m/Y" }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Statut actuel :</strong></td>
+                        <td>
+                            {% if deviss.statut == 'en_cours' %}
+                                <span class="badge badge-warning">En cours</span>
+                            {% elif deviss.statut == 'valide' %}
+                                <span class="badge badge-success">Validé</span>
+                            {% elif deviss.statut == 'refuse' %}
+                                <span class="badge badge-danger">Refusé</span>
+                            {% else %}
+                                <span class="badge badge-secondary">{{ deviss.statut }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% if lignes_devis %}
+    <h3 class="mt-4"><i class="fa fa-list"></i> Liste des Articles</h3>
+    <div class="table-responsive">
+        <table class="lignes-table">
+            <thead>
+                <tr>
+                    <th>Désignation</th>
+                    <th>Quantité</th>
+                    <th>Prix Unit. HT</th>
+                    <th>TVA</th>
+                    <th>Total HT</th>
+                    <th>Total TTC</th>
+                </tr>
+            </thead>
             <tbody>
+                {% for ligne in lignes_devis %}
                 <tr>
-                    <td>client :</td>
-                    <td>{{ deviss.id_client }}</td>
+                    <td>{{ ligne.designation }}</td>
+                    <td>{{ ligne.quantite }}</td>
+                    <td>{{ ligne.prix_unitaire|floatformat:0 }} <small>fcfa</small></td>
+                    <td>{{ ligne.tva }}%</td>
+                    <td>{{ ligne.total_ht|floatformat:0 }} <small>fcfa</small></td>
+                    <td><strong>{{ ligne.total_ttc|floatformat:0 }}</strong> <small>fcfa</small></td>
                 </tr>
-                <tr>
-                    <td>numero du devis :</td>
-                    <td>{{ deviss.numero }}</td>
-                </tr>
-                <tr>
-                    <td>date de creation :</td>
-                    <td>{{ deviss.date_creation }}</td>
-                </tr>
-                <tr>
-                    <td> objet du devis :</td>
-                    <td>{{ deviss.objet_devis }}</td>
-                </tr>
-                <tr>
-                    <td>statut :</td>
-                    <td>{{ deviss.statut }}</td>
-                </tr>
-                <tr>
-                    <td>total HT :</td>
-                    <td>{{ deviss.total_ht }}</td>
-                </tr>
-
-                <tr>
-                    <td>Total TTC :</td>
-                    <td>{{ deviss.total_ttc }}</td>
-                </tr>
-
+                {% endfor %}
             </tbody>
         </table>
+    </div>
 
-
-
+    <div class="totals-container">
+        <table class="totals-table">
+            <tr>
+                <td class="bg-light-gray">Sous-Total HT :</td>
+                <td>{{ deviss.total_ht|floatformat:0 }} <small>fcfa</small></td>
+            </tr>
+            <tr>
+                <td class="bg-light-gray">Montant TVA (19.25%) :</td>
+                <td>{{ total_tva|floatformat:0 }} <small>fcfa</small></td>
+            </tr>
+            <tr>
+                <td class="bg-light-gray">NET À PAYER (TTC) :</td>
+                <td class="text-success"><strong>{{ deviss.total_ttc|floatformat:0 }} <small>FCFA</small></strong></td>
+            </tr>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-warning mt-4">
+            <i class="fa fa-exclamation-triangle"></i> Aucune ligne de devis n'a été trouvée pour ce devis.
+        </div>
+    {% endif %}
 </div>
-
-
 {% endblock %}

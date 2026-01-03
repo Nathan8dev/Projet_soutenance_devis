@@ -14,12 +14,16 @@ import os
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from weasyprint import HTML
-from html2docx import html2docx
+from docxtpl import DocxTemplate
 from django.template.loader import get_template
 
 
 
 #-------------------------------user-----------------------------------------------------------------------
+def accueil_site(request):
+    return render(request,'gestion/accueil.html')
+
+
 def Inscription(request):
     error = False
     message = ""
@@ -77,9 +81,11 @@ def Connexion(request):
             print('utilisateur n\'existe pas')
     return render(request, 'gestion/connexion.html',{'message': message})
 
+
 @login_required(login_url='connexion')
 def Accueil(request):
     return render(request,'gestion/index.html')
+
 
 def log_out(request):
     logout(request)
@@ -87,10 +93,7 @@ def log_out(request):
 
 
 #-------------------------------------------clients------------------------------------------------
-
-
-
-
+@login_required(login_url='connexion')
 def Ajouter_Client(request):
 
     error = False
@@ -101,7 +104,6 @@ def Ajouter_Client(request):
         lieu = request.POST.get('lieu')
         email = request.POST.get('email')
         contact1 = request.POST.get('contact1')
-        contact2 = request.POST.get('contact2')
         infos_supp = request.POST.get('infos_supp')
         try:
             validate_email(email)
@@ -120,7 +122,6 @@ def Ajouter_Client(request):
                 email=email,
                 lieu=lieu,
                 contact1=contact1,
-                contact2=contact2,
                 infos_supp=infos_supp,
                 type='particulier',
             )
@@ -130,6 +131,7 @@ def Ajouter_Client(request):
     return render(request,'gestion/enregistrer_client.html',{'message': message, 'error': error})
 
 
+@login_required(login_url='connexion')
 def Ajouter_entreprise(request):
     error = False
     message = ""
@@ -140,7 +142,6 @@ def Ajouter_entreprise(request):
         lieu = request.POST.get('lieu')
         email = request.POST.get('email')
         contact1 = request.POST.get('contact1')
-        contact2 = request.POST.get('contact2')
         infos_supp = request.POST.get('infos_supp')
         try:
             validate_email(email)
@@ -161,7 +162,6 @@ def Ajouter_entreprise(request):
                 lieu=lieu,
                 email=email,
                 contact1=contact1,
-                contact2=contact2,
                 infos_supp=infos_supp,
                 type='entreprise',
             )
@@ -170,12 +170,16 @@ def Ajouter_entreprise(request):
             return redirect('accueil')
     return render(request, 'gestion/enregistrer_entreprise.html', {'message': message, 'error': error})
 
+
+@login_required(login_url='connexion')
 def Liste_client(request):
     particuliers = Particulier.objects.filter(id_user=request.user)
     entreprises = Entreprise.objects.filter(id_user=request.user)
 
     return render(request, 'gestion/liste_client.html',{'particuliers':particuliers, 'entreprises': entreprises})
 
+
+@login_required(login_url='connexion')
 def Detail_client(request, id):
     clients = Client.objects.get(id=id)
     if clients.type == 'particulier':
@@ -184,6 +188,9 @@ def Detail_client(request, id):
     if clients.type == 'entreprise':
         entreprise = Entreprise.objects.get(id=id)
         return render(request,'gestion/detail_client.html',{'client': clients, 'entreprise': entreprise})
+    
+    
+@login_required(login_url='connexion')
 def detail_client(request, id):
     clients = Client.objects.get(id=id)
     if clients.type == 'particulier':
@@ -193,6 +200,8 @@ def detail_client(request, id):
         entreprise = Entreprise.objects.get(id=id)
         return render(request, 'gestion/modifier_client.html', {'client': clients, 'entreprise': entreprise})
 
+
+@login_required(login_url='connexion')
 def Modifier_client(request, id):
     client = get_object_or_404(Client, id=id)
     if request.method == 'POST':
@@ -202,7 +211,6 @@ def Modifier_client(request, id):
             client.lieu = request.POST.get('lieu')
             client.email = request.POST.get('email')
             client.contact1 = request.POST.get('contact1')
-            client.contact2 = request.POST.get('contact2')
             client.infos_supp = request.POST.get('infos_supp')
             client.type = 'particulier'
 
@@ -213,7 +221,6 @@ def Modifier_client(request, id):
             client.lieu = request.POST.get('lieu')
             client.email = request.POST.get('email')
             client.contact1 = request.POST.get('contact1')
-            client.contact2 = request.POST.get('contact2')
             client.infos_supp = request.POST.get('infos_supp')
             client.type = 'entreprise'
             client.immatriculation = request.POST.get('immatriculation')
@@ -224,6 +231,8 @@ def Modifier_client(request, id):
 
     return render(request, 'gestion/modifier_client.html')
 
+
+@login_required(login_url='connexion')
 def Delete_client(request, id):
     client = get_object_or_404(Client, id=id)
     client.delete()
@@ -232,102 +241,107 @@ def Delete_client(request, id):
 
 
 #----------------------------------------------devis------------------------------------------------------------------
+@login_required(login_url='connexion')
 def Afficher_devis(request):
-
-
     clients = Client.objects.filter(id_user=request.user)
     return render(request, 'gestion/enregistrer_devis.html',{'clients': clients})
 
+
+@login_required(login_url='connexion')
 def Creer_devis(request):
-    produits = request.COOKIES.get('produit')
-    totalht = 0
-    totalttc = 0
-
+    produits_cookie = request.COOKIES.get('produit')
+    
     if request.method == 'POST':
+        if not produits_cookie:
+            return redirect('creer_devis')
 
-        produit = json.loads(produits)
-        print(produit)
+        try:
+            liste_produits = json.loads(produits_cookie)
+        except json.JSONDecodeError:
+            return redirect('creer_devis')
 
-        for i in produit:
-            prixttc = i['prixTTC']
-            totalttc += float(prixttc)
-        print(totalttc)
+        global_total_ht = 0
+        global_total_ttc = 0
 
-        for i in produit:
-            prixHT = i['prixHT']
-            totalht += float(prixHT)
-        print(totalht)
+        for item in liste_produits:
+            qte = int(item.get('quantite') or 0)
+            pu_ht = float(item.get('prix') or 0)
+            tva_taux = float(item.get('tva') or 19.25)
+            
+            ligne_ht = qte * pu_ht
+            montant_tva_ligne = ligne_ht * (tva_taux / 100)
+            ligne_ttc = ligne_ht + montant_tva_ligne
+            
+            global_total_ht += ligne_ht
+            global_total_ttc += ligne_ttc
 
+        objet_devis = request.POST.get('objet_devis')
+        id_client = request.POST.get('client')
+        client_obj = Client.objects.get(id=id_client)
 
-
-
-
-        object_devis = request.POST.get('objet_devis')
-        client = request.POST.get('client')
-        id_client = Client.objects.get(id=client)
-        Devis.objects.create(
-            id_client = id_client,
-            objet_devis = object_devis,
-            total_ht = totalht,
-            total_ttc = totalttc,
+        devis = Devis.objects.create(
+            id_user=request.user, 
+            id_client=client_obj,
+            objet_devis=objet_devis,
+            total_ht=global_total_ht,
+            total_ttc=global_total_ttc,
         )
-        devis = Devis.objects.last()
-        if devis:
-            for i in produit:
-                LigneDevis.objects.create(
-                    devis = devis,
-                    designation = i['designation'],
-                    quantite = i['quantite'],
-                    prix_unitaire = i['prix'],
-                    prix_ht = i['prixHT'],
-                    tva = i['tva'],
-                    total_ht = totalht,
-                    total_ttc = (int(i['quantite']) * float(i['prixHT']))*float(i['tva'])/100,
 
+        if devis.pk:
+            for item in liste_produits:
+                qte = int(item.get('quantite') or 0)
+                pu_ht = float(item.get('prix') or 0)
+                tva_taux = float(item.get('tva') or 19.25)
+                
+                ligne_ht = qte * pu_ht
+                ligne_ttc = ligne_ht * (1 + (tva_taux / 100))
+
+                LigneDevis.objects.create(
+                    devis=devis,
+                    designation=item.get('designation'),
+                    quantite=qte,
+                    prix_unitaire=pu_ht,
+                    prix_ht=ligne_ht,
+                    tva=tva_taux,
+                    total_ht=ligne_ht,
+                    total_ttc=ligne_ttc, 
                 )
 
-
-            return redirect('creerdevis')
-
-
+            return redirect('Devis_final')
 
     return render(request, 'gestion/creer_devis.html')
 
+
+@login_required(login_url='connexion')
 def DevisFinal(request):
-    dernier_devis = Devis.objects.latest('numero')
+    try:
+        dernier_devis = Devis.objects.filter(id_user=request.user).latest('numero')
+        
+        lignes_devis = LigneDevis.objects.filter(devis=dernier_devis)
 
-    lignes_devis = LigneDevis.objects.filter(devis=dernier_devis)
+        numero_personnalise = dernier_devis.get_numero_sequentiel()
 
-    nom_client = dernier_devis.id_client
-    numero = dernier_devis.numero
-    date_devis = dernier_devis.date_creation
-    objet = dernier_devis.objet_devis
-    total_ttc = dernier_devis.total_ttc
-    total_ht = dernier_devis.total_ht
-    total_TVA = 0
-    for ligne in lignes_devis:
-        TVA = ligne.tva
-        total_TVA+=TVA
+        montant_tva = dernier_devis.total_ttc - dernier_devis.total_ht
 
+        context = {
+            'client': dernier_devis.id_client.nom,
+            'numero': numero_personnalise,
+            'id_technique': dernier_devis.numero, 
+            'date_devis': dernier_devis.date_creation,
+            'objet': dernier_devis.objet_devis,
+            'lignes_devis': lignes_devis,
+            'total_ttc': dernier_devis.total_ttc,
+            'total_ht': dernier_devis.total_ht,
+            'total_TVA': montant_tva, 
+        }
 
+        response = render(request, 'gestion/creerdevis.html', context)
+        
+        response.delete_cookie('produit')
+        return response
 
-
-    response = render(request, 'gestion/creerdevis.html',
-                      {'client': nom_client,
-                       'numero': numero,
-                       'date_devis': date_devis,
-                       'objet': objet,
-                       'lignes_devis': lignes_devis,
-                       'total_ttc': total_ttc,
-                       'total_ht': total_ht,
-                       'total_TVA': total_TVA,
-                       }
-                      )
-    response.delete_cookie('produit')
-    return response
-
-
-
+    except Devis.DoesNotExist:
+        return redirect('creer_devis')
 
 
 def Search_devis(request):
@@ -337,85 +351,93 @@ def Search_devis(request):
         return render(request, 'gestion/chercher_devis.html', {'clients': clients})
 
 
-
 def Generer_pdf(request):
-    dernier_devis = Devis.objects.latest('numero')
-
+    dernier_devis = Devis.objects.filter(id_user=request.user).latest('numero')
     lignes_devis = LigneDevis.objects.filter(devis=dernier_devis)
 
-    nom_client = dernier_devis.id_client
-    numero = dernier_devis.numero
-    date_devis = dernier_devis.date_creation
-    objet = dernier_devis.objet_devis
-    total_ttc = dernier_devis.total_ttc
-    total_ht = dernier_devis.total_ht
-    total_TVA = 0
-    for ligne in lignes_devis:
-        TVA = ligne.tva
-        total_TVA += TVA
+    total_TVA = dernier_devis.total_ttc - dernier_devis.total_ht
+
     context = {
-        'client': nom_client,
-        'numero': numero,
-        'date_devis': date_devis,
-        'objet': objet,
+        'client': dernier_devis.id_client.nom,
+        'numero': dernier_devis.get_numero_sequentiel(), 
+        'date_devis': dernier_devis.date_creation,
+        'objet': dernier_devis.objet_devis,
         'lignes_devis': lignes_devis,
-        'total_ttc': total_ttc,
-        'total_ht': total_ht,
+        'total_ttc': dernier_devis.total_ttc,
+        'total_ht': dernier_devis.total_ht,
         'total_TVA': total_TVA,
     }
+    
     html_string = render_to_string('gestion/pdfdevis.html', context)
-    html = HTML(string=html_string)
+    html = HTML(string=html_string, base_url=request.build_absolute_uri())
 
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'filename="devis.pdf"'
+    response['Content-Disposition'] = f'inline; filename="Devis_{dernier_devis.get_numero_sequentiel()}.pdf"'
     html.write_pdf(response)
     return response
+
+
 def Generer_word(request):
-    template = get_template('gestion/pdfdevis.html')
-    dernier_devis = Devis.objects.latest('numero')
-
-    lignes_devis = LigneDevis.objects.filter(devis=dernier_devis)
-
-    nom_client = dernier_devis.id_client
-    numero = dernier_devis.numero
-    date_devis = dernier_devis.date_creation
-    objet = dernier_devis.objet_devis
-    total_ttc = dernier_devis.total_ttc
-    total_ht = dernier_devis.total_ht
-    total_TVA = 0
-    for ligne in lignes_devis:
-        TVA = ligne.tva
-        total_TVA += TVA
+    dernier_devis = Devis.objects.filter(id_user=request.user).latest('numero')
+    lignes = LigneDevis.objects.filter(devis=dernier_devis)
+    
+    doc = DocxTemplate("gestion/worddevis.docx")
+    
     context = {
-        'client': nom_client,
-        'numero': numero,
-        'date_devis': date_devis,
-        'objet': objet,
-        'lignes_devis': lignes_devis,
-        'total_ttc': total_ttc,
-        'total_ht': total_ht,
-        'total_TVA': total_TVA,
+        'client': dernier_devis.id_client.nom,
+        'numero': dernier_devis.get_numero_sequentiel(),
+        'date_devis': dernier_devis.date_creation.strftime("%d/%m/%Y"),
+        'objet': dernier_devis.objet_devis,
+        'lignes_devis': lignes,
+        'total_ht': f"{dernier_devis.total_ht:,.0f} fcfa",
+        'total_TVA': f"{(dernier_devis.total_ttc - dernier_devis.total_ht):,.0f} fcfa",
+        'total_ttc': f"{dernier_devis.total_ttc:,.0f} fcfa",
     }
-    html_content = template.render(context)
-
-    document = html2docx(html_content, title=f"Devis")
-
-
-    with open('devis.docx', 'rb') as docx:
-        docx.writ(document)
+    
+    doc.render(context)
+    
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    )
+    response['Content-Disposition'] = f'attachment; filename="Devis_{context["numero"]}.docx"'
+    
     return response
 
-@login_required
+
+
+@login_required(login_url='connexion')
 def Liste_devis(request):
-    deviss = Devis.objects.filter(id_user=request.user)
+    deviss = Devis.objects.filter(id_user=request.user).order_by('-date_creation')
+ 
     return render(request, 'gestion/liste_devis.html', {'deviss': deviss})
 
-def Detail_devis(request,numero):
-    deviss = Devis.objects.get(numero=numero)
-    return render(request, 'gestion/detail_devis.html', {'deviss': deviss})
+
+@login_required(login_url='connexion')
+def Detail_devis(request, numero):
+
+    devis_obj = get_object_or_404(Devis, numero=numero, id_user=request.user)
+    
+    lignes = LigneDevis.objects.filter(devis=devis_obj)
+    
+    tva_totale = devis_obj.total_ttc - devis_obj.total_ht
+
+    context = {
+        'deviss': devis_obj,
+        'lignes_devis': lignes, 
+        'total_tva': tva_totale,
+        'numero': devis_obj.get_numero_sequentiel() 
+    }
+    
+    return render(request, 'gestion/detail_devis.html', context)
+
+
+@login_required(login_url='connexion')
 def Supprimer_devis(request, numero):
     devis = get_object_or_404(Devis, numero=numero)
     devis.delete()
     return redirect('liste_devis')
-
-
