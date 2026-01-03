@@ -8,7 +8,6 @@ class Client(models.Model):
     lieu = models.CharField(max_length=250)
     email = models.CharField(max_length=250)
     contact1 = models.IntegerField()
-    contact2 = models.IntegerField()
     infos_supp = models.CharField(max_length=250)
     TYPE_CLIENT=[
         ('particulier', 'Particulier'),

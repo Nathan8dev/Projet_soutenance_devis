@@ -20,7 +20,8 @@ from gestion import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.Inscription, name='inscription'),
+    path('', views.accueil_site, name='accueil_site'),
+    path('Inscription/', views.Inscription, name='inscription'),
     path('connexion/', views.Connexion, name='connexion'),
     path('accueil/',views.Accueil, name='accueil'),
     path('logout/', views.log_out, name='logout'),

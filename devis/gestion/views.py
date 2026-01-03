@@ -20,6 +20,10 @@ from django.template.loader import get_template
 
 
 #-------------------------------user-----------------------------------------------------------------------
+def accueil_site(request):
+    return render(request,'gestion/accueil.html')
+
+
 def Inscription(request):
     error = False
     message = ""
@@ -77,9 +81,11 @@ def Connexion(request):
             print('utilisateur n\'existe pas')
     return render(request, 'gestion/connexion.html',{'message': message})
 
+
 @login_required(login_url='connexion')
 def Accueil(request):
     return render(request,'gestion/index.html')
+
 
 def log_out(request):
     logout(request)
@@ -87,10 +93,7 @@ def log_out(request):
 
 
 #-------------------------------------------clients------------------------------------------------
-
-
-
-
+@login_required(login_url='connexion')
 def Ajouter_Client(request):
 
     error = False
@@ -101,7 +104,6 @@ def Ajouter_Client(request):
         lieu = request.POST.get('lieu')
         email = request.POST.get('email')
         contact1 = request.POST.get('contact1')
-        contact2 = request.POST.get('contact2')
         infos_supp = request.POST.get('infos_supp')
         try:
             validate_email(email)
@@ -120,7 +122,6 @@ def Ajouter_Client(request):
                 email=email,
                 lieu=lieu,
                 contact1=contact1,
-                contact2=contact2,
                 infos_supp=infos_supp,
                 type='particulier',
             )
@@ -130,6 +131,7 @@ def Ajouter_Client(request):
     return render(request,'gestion/enregistrer_client.html',{'message': message, 'error': error})
 
 
+@login_required(login_url='connexion')
 def Ajouter_entreprise(request):
     error = False
     message = ""
@@ -140,7 +142,6 @@ def Ajouter_entreprise(request):
         lieu = request.POST.get('lieu')
         email = request.POST.get('email')
         contact1 = request.POST.get('contact1')
-        contact2 = request.POST.get('contact2')
         infos_supp = request.POST.get('infos_supp')
         try:
             validate_email(email)
@@ -161,7 +162,6 @@ def Ajouter_entreprise(request):
                 lieu=lieu,
                 email=email,
                 contact1=contact1,
-                contact2=contact2,
                 infos_supp=infos_supp,
                 type='entreprise',
             )
@@ -170,12 +170,16 @@ def Ajouter_entreprise(request):
             return redirect('accueil')
     return render(request, 'gestion/enregistrer_entreprise.html', {'message': message, 'error': error})
 
+
+@login_required(login_url='connexion')
 def Liste_client(request):
     particuliers = Particulier.objects.filter(id_user=request.user)
     entreprises = Entreprise.objects.filter(id_user=request.user)
 
     return render(request, 'gestion/liste_client.html',{'particuliers':particuliers, 'entreprises': entreprises})
 
+
+@login_required(login_url='connexion')
 def Detail_client(request, id):
     clients = Client.objects.get(id=id)
     if clients.type == 'particulier':
@@ -184,6 +188,9 @@ def Detail_client(request, id):
     if clients.type == 'entreprise':
         entreprise = Entreprise.objects.get(id=id)
         return render(request,'gestion/detail_client.html',{'client': clients, 'entreprise': entreprise})
+    
+    
+@login_required(login_url='connexion')
 def detail_client(request, id):
     clients = Client.objects.get(id=id)
     if clients.type == 'particulier':
@@ -193,6 +200,8 @@ def detail_client(request, id):
         entreprise = Entreprise.objects.get(id=id)
         return render(request, 'gestion/modifier_client.html', {'client': clients, 'entreprise': entreprise})
 
+
+@login_required(login_url='connexion')
 def Modifier_client(request, id):
     client = get_object_or_404(Client, id=id)
     if request.method == 'POST':
@@ -202,7 +211,6 @@ def Modifier_client(request, id):
             client.lieu = request.POST.get('lieu')
             client.email = request.POST.get('email')
             client.contact1 = request.POST.get('contact1')
-            client.contact2 = request.POST.get('contact2')
             client.infos_supp = request.POST.get('infos_supp')
             client.type = 'particulier'
 
@@ -213,7 +221,6 @@ def Modifier_client(request, id):
             client.lieu = request.POST.get('lieu')
             client.email = request.POST.get('email')
             client.contact1 = request.POST.get('contact1')
-            client.contact2 = request.POST.get('contact2')
             client.infos_supp = request.POST.get('infos_supp')
             client.type = 'entreprise'
             client.immatriculation = request.POST.get('immatriculation')
@@ -224,6 +231,8 @@ def Modifier_client(request, id):
 
     return render(request, 'gestion/modifier_client.html')
 
+
+@login_required(login_url='connexion')
 def Delete_client(request, id):
     client = get_object_or_404(Client, id=id)
     client.delete()
@@ -232,12 +241,13 @@ def Delete_client(request, id):
 
 
 #----------------------------------------------devis------------------------------------------------------------------
+@login_required(login_url='connexion')
 def Afficher_devis(request):
-
-
     clients = Client.objects.filter(id_user=request.user)
     return render(request, 'gestion/enregistrer_devis.html',{'clients': clients})
 
+
+@login_required(login_url='connexion')
 def Creer_devis(request):
     produits = request.COOKIES.get('produit')
     totalht = 0
@@ -257,10 +267,6 @@ def Creer_devis(request):
             prixHT = i['prixHT']
             totalht += float(prixHT)
         print(totalht)
-
-
-
-
 
         object_devis = request.POST.get('objet_devis')
         client = request.POST.get('client')
@@ -283,15 +289,12 @@ def Creer_devis(request):
                     tva = i['tva'],
                     total_ht = totalht,
                     total_ttc = (int(i['quantite']) * float(i['prixHT']))*float(i['tva'])/100,
-
                 )
-
 
             return redirect('creerdevis')
 
-
-
     return render(request, 'gestion/creer_devis.html')
+
 
 def DevisFinal(request):
     dernier_devis = Devis.objects.latest('numero')
@@ -309,9 +312,6 @@ def DevisFinal(request):
         TVA = ligne.tva
         total_TVA+=TVA
 
-
-
-
     response = render(request, 'gestion/creerdevis.html',
                       {'client': nom_client,
                        'numero': numero,
@@ -327,15 +327,11 @@ def DevisFinal(request):
     return response
 
 
-
-
-
 def Search_devis(request):
     recherche = request.GET.get('recherche')
     if recherche:
         clients = Client.objects.filter(nom__icontains=recherche)
         return render(request, 'gestion/chercher_devis.html', {'clients': clients})
-
 
 
 def Generer_pdf(request):
@@ -370,6 +366,8 @@ def Generer_pdf(request):
     response['Content-Disposition'] = 'filename="devis.pdf"'
     html.write_pdf(response)
     return response
+
+
 def Generer_word(request):
     template = get_template('gestion/pdfdevis.html')
     dernier_devis = Devis.objects.latest('numero')
@@ -398,24 +396,29 @@ def Generer_word(request):
     }
     html_content = template.render(context)
 
-    document = html2docx(html_content, title=f"Devis")
+    document = html2docx(html_content, title=f"Devis {numero}")
+    document.save('devis.docx')
+
+    with open('devis.docx', 'rb') as f:
+        response = HttpResponse(f.read(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        response['Content-Disposition'] = f'attachment; filename="devis_{numero}.docx"'
+        return response
 
 
-    with open('devis.docx', 'rb') as docx:
-        docx.writ(document)
-    return response
-
-@login_required
+@login_required(login_url='connexion')
 def Liste_devis(request):
     deviss = Devis.objects.filter(id_user=request.user)
     return render(request, 'gestion/liste_devis.html', {'deviss': deviss})
 
+
+@login_required(login_url='connexion')
 def Detail_devis(request,numero):
     deviss = Devis.objects.get(numero=numero)
     return render(request, 'gestion/detail_devis.html', {'deviss': deviss})
+
+
+@login_required(login_url='connexion')
 def Supprimer_devis(request, numero):
     devis = get_object_or_404(Devis, numero=numero)
     devis.delete()
     return redirect('liste_devis')
-
-
