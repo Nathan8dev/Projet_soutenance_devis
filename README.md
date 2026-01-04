@@ -13,7 +13,7 @@ Application web développée avec Django permettant aux utilisateurs de créer, 
 
 ## 🛠️ Installation
 1. Cloner le repository :
-   `git clone https://github.com/ton-nom/nathan-devis.git`
+   `git@github.com:Nathan8dev/Projet_soutenance_devis.git`
 2. Créer un environnement virtuel :
    `python -m venv Env`
 3. Activer l'environnement :
